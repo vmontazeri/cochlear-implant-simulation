@@ -96,6 +96,7 @@ if ~exist('Wn','var')
 end
 % Find the bandpass cuttoffs
 Wn=Wn+Bw;
+Wn
 Wn(Wn>1) = 0.99;
 Wn(Wn<0) = 0.01;
 
@@ -117,17 +118,16 @@ for i=1:nchan
     [b,a] = butter(4,Wn(i,:));
     
     if(verbose)
-        [h,f]=freqz(b,a,1024,rate);        
+        [h,f]=freqz(b,a,512,rate);        
         figure(1);
         plot(f,20*log10(abs(h+eps)),'LineWidth',2);
         hold on;
         min_f = min(Wn(:,1))*rate/2 - 50;
         axis([min_f rate/2 -3 0.5]);
-        x_ticks = round(logspace(log10(min_f), log10(rate/2), nchan));
-        set(gca,'XScale','log', 'XTick', x_ticks);                  
-        xlabel('Frequency (Hz)');
+        set(gca,'XScale','log','TickDir','Out');        
+        xlabel('Frequency (kHz)');
         ylabel('Filter gain (dB)');
-        title('Band-pass filters transfer function');
+        title('Band-pass filters transfer functions');
         grid on;
     end
     

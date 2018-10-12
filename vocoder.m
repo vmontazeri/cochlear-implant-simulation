@@ -122,7 +122,7 @@ for i=1:nchan
         plot(f,20*log10(abs(h+eps)),'LineWidth',2);
         hold on;
         min_f = min(Wn(:,1))*rate/2 - 50;
-        axis([min_f rate/2 -3 0.5]);
+        axis([min_f rate/2 -6 0.5]);
         x_ticks = round(logspace(log10(min_f), log10(rate/2), nchan));
         set(gca,'XScale','log', 'XTick', x_ticks);                  
         xlabel('Frequency (Hz)');

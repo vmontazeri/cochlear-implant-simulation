@@ -20,7 +20,7 @@ See the example file 'example.m' on how to use this code.
 
 Refer to Shannon, Zeng, Kamath, Wygonski and Ekelid (1995). Speech Recognition with Primarily Temporal Cues, Science for more information about vocoders. 
 
-Code written by Vahid Montazeri, October 2018.
+Vahid Montazeri, October 2018.
 
 :slightly_smiling_face:
 

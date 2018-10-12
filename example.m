@@ -6,7 +6,7 @@ FS = 16e3;
 
 x = resample(x, FS, fs);
 
-y=vocoder(x, FS, 8, 160 , 'NOISE', 1);
+y=vocoder(x, FS, 8, 160, 'NOISE', 1);
 
 figure;
 plot((1:length(y))/FS, y);

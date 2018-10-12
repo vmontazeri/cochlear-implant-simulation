@@ -1,0 +1,178 @@
+function vocoded_x=vocoder(x, rate, nchan, cutoff , vocoder_type, verbose)
+% Implementation of cochlear implant simulation, referred to as vocoder.
+% The first argument is the signal.
+% The second argument is the sampling rate (preferred 16Khz)
+% The third argument is the number of spectral channels between 2 and 9.
+% The fourth argument is the cutoff frequency for envelope extraction. The higher the
+%   cutoff, the more fine structure will be available in the vocoded signal.
+% The fifth argument specifies the type of vocoder: either NOISE or TONE vocoders.
+% The sixth argument provides more details regarding the bandpass
+% filters.
+% See the example file 'example.m' on how to use this code.
+% Refer to Shannon, Zeng, Kamath, Wygonski and Ekelid (1995). 
+% Speech Recognition with Primarily Temporal Cues, Science
+% for more information about vocoders. 
+% 
+% Code written by Vahid Montazeri, October 2018.
+
+switch nargin
+    case 2
+        nchan = 8;
+        cutoff = 160;
+        vocoder_type = 'NOISE';
+        verbose = 1;
+    case 3
+        cutoff = 160;
+        vocoder_type = 'NOISE';
+        verbose = 1;
+    case 4
+        vocoder_type = 'NOISE';
+        verbose = 1;
+    case 5
+        verbose = 1;
+end
+
+% Make sure the signal is a column vector
+if( size(x,2)>size(x,1) )
+    x = x';
+end
+x = x(:,1);
+
+npts=length(x);
+
+% Apply high-pass pre-emphasis filter
+pre=0.9378;
+xx=filter([1 -pre], 1, x)';
+
+% Center Freq. based on number of channels. These values are taken from
+% Dorman, Loizou, Rainey, (1997). Speech intelligibility as a function of the number of channels
+% of stimulation for signal processors using sine-wave
+% and noise-band outputs. JASA
+
+if ~exist('Wn','var')
+    if     nchan==1
+        error('Error in number of channels');
+    elseif nchan==2
+        Wn = repmat([792; 3392], 1, 2);
+    elseif nchan==3
+        Wn=repmat([0545; 1438; 3793], 1, 2);
+    elseif nchan==4
+        Wn=repmat([0460; 0953; 1971; 4078], 1, 2);
+    elseif nchan==5
+        Wn=repmat([0418; 0748; 1339; 2396; 4287], 1, 2);
+    elseif nchan==6
+        Wn=repmat([0393; 0639; 1037; 1685; 2736; 4443],1, 2);
+    elseif nchan==7
+        Wn=repmat([0377; 0572; 0866; 1312; 1988; 3013; 4565], 1, 2);
+    elseif nchan==8
+        Wn=repmat([0366; 0526; 0757; 1089; 1566; 2252; 3241; 4662], 1, 2);
+    elseif nchan==9
+        Wn=repmat([0357; 0493; 0682; 0942; 1301; 1798; 2484; 3431; 4740], 1, 2);
+    else
+        error('Wrong chanel number');
+    end
+    Wn = Wn/(rate/2);
+    
+    %     Bandwidth based on number of channels
+    if nchan==2
+        Bw=0.5*[-0984 0984; -4215 4215]./(rate/2);
+    elseif nchan==3
+        Bw=0.5*[-0491 0491; -1295 1295; -3414 3414]./(rate/2);
+    elseif nchan==4
+        Bw=0.5*[-0321 0321; -0664 0664; -1373 1373; -2842 2842]./(rate/2);
+    elseif nchan==5
+        Bw=0.5*[-0237 0237; -0423 0423; -0758 0758; -1356 1356; -2426 2426]./(rate/2);
+    elseif nchan==6
+        Bw=0.5*[-0187 0187; -0304 0304; -0493 0493; -0801 0801; -1301 1301; -2113 2113]./(rate/2);
+    elseif nchan==7
+        Bw=0.5*[-0154 0154; -0234 0234; -0355 0355; -0538 0538; -0814 0814; -1234 1234; -1870 1870]./(rate/2);
+    elseif nchan==8
+        Bw=0.5*[-0131 0131; -0189 0189; -0272 0272; -0391 0391; -0563 0563; -0810 0810; -1165 1165; -1676 1676]./(rate/2);
+    elseif nchan==9
+        Bw=0.5*[-0114 0114; -0158 0158; -0218 0218; -0302 0302; -0417 0417; -0576 0576; -0796 0796; -1099 1099; -1519 1519]./(rate/2);
+    else
+        error('Wrong chanel number');
+    end
+end
+% Find the bandpass cuttoffs
+Wn=Wn+Bw;
+Wn(Wn>1) = 0.99;
+Wn(Wn<0) = 0.01;
+
+% Generate lowpass filter coefficients (for envelope extraction):
+fc=cutoff /(rate/2);
+[blp,alp]=butter(2,fc,'low'); % generate filter coefficients
+
+% Generate noise carrier only for noise vocoders
+if( strcmp(vocoder_type, 'NOISE') )
+    noise = rand( length(x),1 );
+    noise = noise(:);
+end
+
+vocoded_x=zeros(npts,1);
+
+for i=1:nchan
+    
+    %     Find the filter coefficients for each bandpass filter
+    [b,a] = butter(4,Wn(i,:));
+    
+    if(verbose)
+        [h,f]=freqz(b,a,512,rate);
+        figure(1);
+        plot(f(1:230),20*log10(abs(h(1:230)+eps)),'LineWidth',2);
+        hold on;
+        axis([100 10000 -50 5]);
+        set(gca,'XScale','log','TickDir','Out');
+        %         set(gca,'XTick',[100 200 500 1000:1000:10000],...
+        %             'XTickLabel',{'0.1','0.2','0.5','1','2','4','6','8','10'});
+        xlabel('Filter center frequency (kHz)');
+        ylabel('Filter gain (dB)');
+        title('Filters');
+        grid on;
+    end
+    
+    % now filter the input waveform using filter #i
+    filtwav = filtfilt(b,a,xx)';
+    
+    %     Half-wave rectification
+    filtwav(filtwav<0) = 0;
+    
+    %     Filter the band-passed filtered signal to extract its envelope
+    %     (Overall shape)
+    envelope=filter(blp,alp,filtwav);
+    envelope = envelope(:);
+    
+    %     If noise vocoder is selected, then multiply the envelope with the
+    %     noise carrier.
+    %    Basically, we modulate the noise by the envelope
+    if(strcmp(vocoder_type, 'NOISE'))
+        if length(envelope) > length(noise)
+            envelope(length(noise)+1:length(envelope))=[];
+        end
+        
+        if length(noise) > length(envelope)
+            noise(length(envelope)+1:length(noise))=[];
+        end
+        
+        source = noise./(max(abs(noise)));
+        fn=filtfilt(b,a,envelope.*source);
+        
+    else
+        %     If tone vocoder is selected, then multiply the envelope with a
+        %     tone carrier.
+        %    Basically, we modulate the tone by the envelope
+        
+        %     Tone with freq. at the center of the band-pass filter
+        f = exp(mean(log(Wn(i,:)))) * (rate/2);
+        tone=sin(2*pi*(1:length(envelope))*f/rate)';
+        tone = tone(:);
+        fn = envelope.*tone;
+        
+    end
+    
+    % sum bands with equal gain in each channel
+    vocoded_x=vocoded_x + fn;
+end
+
+% Scale output waveform to have same rms as original
+vocoded_x = vocoded_x * (rms(x)/rms(vocoded_x));

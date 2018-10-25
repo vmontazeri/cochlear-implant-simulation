@@ -18,7 +18,7 @@ function vocoded_x=vocoder(x, rate, nchan, cutoff , vocoder_type, verbose)
 switch nargin
     case 2
         nchan = 8;
-        cutoff = 160;
+n        cutoff = 160;
         vocoder_type = 'NOISE';
         verbose = 1;
     case 3
@@ -40,7 +40,7 @@ x = x(:,1);
 
 npts=length(x);
 
-% Apply high-pass pre-emphasis filter
+n% Apply high-pass pre-emphasis filter
 pre=0.9378;
 xx=filter([1 -pre], 1, x)';
 
@@ -69,7 +69,7 @@ if ~exist('Wn','var')
     elseif nchan==9
         Wn=repmat([0357; 0493; 0682; 0942; 1301; 1798; 2484; 3431; 4740], 1, 2);
     else
-        error('Wrong chanel number');
+        error('Wrong channel number');
     end
     Wn = Wn/(rate/2);
     
@@ -91,7 +91,7 @@ if ~exist('Wn','var')
     elseif nchan==9
         Bw=0.5*[-0114 0114; -0158 0158; -0218 0218; -0302 0302; -0417 0417; -0576 0576; -0796 0796; -1099 1099; -1519 1519]./(rate/2);
     else
-        error('Wrong chanel number');
+        error('Wrong channel number');
     end
 end
 % Find the bandpass cuttoffs
@@ -100,7 +100,7 @@ Wn(Wn>1) = 0.99;
 Wn(Wn<0) = 0.01;
 
 % Generate lowpass filter coefficients (for envelope extraction):
-fc=cutoff /(rate/2);
+ fc=cutoff /(rate/2);
 [blp,alp]=butter(2,fc,'low'); % generate filter coefficients
 
 % Generate noise carrier only for noise vocoders
@@ -110,7 +110,7 @@ if( strcmp(vocoder_type, 'NOISE') )
 end
 
 vocoded_x=zeros(npts,1);
-
+ 
 for i=1:nchan
     
     %     Find the filter coefficients for each bandpass filter
@@ -171,7 +171,7 @@ for i=1:nchan
     end
     
     % sum bands with equal gain in each channel
-    vocoded_x=vocoded_x + fn;
+    vocoded_x = vocoded_x + fn;
 end
 
 % Scale output waveform to have same rms as original

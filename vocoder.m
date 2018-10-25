@@ -1,4 +1,4 @@
-function vocoded_x=vocoder(x, rate, nchan, cutoff , vocoder_type, verbose)
+unction vocoded_x=vocoder(x, rate, nchan, cutoff , vocoder_type, verbose)
 % Implementation of cochlear implant simulation, referred to as vocoder.
 % The first argument is the signal.
 % The second argument is the sampling rate (preferred 16Khz)
@@ -18,7 +18,7 @@ function vocoded_x=vocoder(x, rate, nchan, cutoff , vocoder_type, verbose)
 switch nargin
     case 2
         nchan = 8;
-n        cutoff = 160;
+        cutoff = 160;
         vocoder_type = 'NOISE';
         verbose = 1;
     case 3
@@ -40,7 +40,7 @@ x = x(:,1);
 
 npts=length(x);
 
-n% Apply high-pass pre-emphasis filter
+% Apply high-pass pre-emphasis filter
 pre=0.9378;
 xx=filter([1 -pre], 1, x)';
 

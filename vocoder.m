@@ -1,4 +1,4 @@
-unction vocoded_x=vocoder(x, rate, nchan, cutoff , vocoder_type, verbose)
+function vocoded_x=vocoder(x, rate, nchan, cutoff , vocoder_type, verbose)
 % Implementation of cochlear implant simulation, referred to as vocoder.
 % The first argument is the signal.
 % The second argument is the sampling rate (preferred 16Khz)

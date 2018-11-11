@@ -1,4 +1,4 @@
-# Cochlear implant simulations using vocoders 
+# Cochlear implant simulation using vocoders 
 
 Implementation of cochlear implant simulation, referred to as vocoder.
 

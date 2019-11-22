@@ -51,7 +51,7 @@ xx=filter([1 -pre], 1, x)';
 
 if ~exist('Wn','var')
     if     nchan==1
-        error('Error in number of channels');
+        Wn = repmat([4000], 1, 2);
     elseif nchan==2
         Wn = repmat([792; 3392], 1, 2);
     elseif nchan==3
@@ -74,7 +74,9 @@ if ~exist('Wn','var')
     Wn = Wn/(rate/2);
     
     %     Bandwidth based on number of channels
-    if nchan==2
+    if     nchan==1
+        Bw=0.5*[-7500 7500]./(rate/2);
+    elseif nchan==2
         Bw=0.5*[-0984 0984; -4215 4215]./(rate/2);
     elseif nchan==3
         Bw=0.5*[-0491 0491; -1295 1295; -3414 3414]./(rate/2);
